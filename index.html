@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Advanced JavaScript Array Methods Playground</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        #studentForm {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        input, select, button {
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #output {
+            background-color: #f1f8ff;
+            border: 1px solid #b0d4ff;
+            border-radius: 4px;
+            padding: 15px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 JavaScript Array Methods Explorer</h1>
+        
+        <form id="studentForm">
+            <input type="text" id="name" placeholder="Student Name" required>
+            <input type="number" id="age" placeholder="Age" min="18" max="50" required>
+            <input type="number" id="grade" placeholder="Grade (0-100)" min="0" max="100" required>
+            <select id="major" required>
+                <option value="">Select Major</option>
+                <option value="Computer Science">Computer Science</option>
+                <option value="Mathematics">Mathematics</option>
+                <option value="Physics">Physics</option>
+                <option value="Engineering">Engineering</option>
+            </select>
+            <button type="submit">Add Student</button>
+            <button type="button" id="resetButton">Reset Students</button>
+        </form>
+    </div>
+
+    <div class="container">
+        <h2>Array Methods Results</h2>
+        <div id="output"></div>
+    </div>
+
+    <script>
+    // Advanced Array Methods Demonstration Class
+    class StudentDataManager {
+        constructor() {
+            // Initialize students with some default data
+            this.students = [
+                { name: "Alice", age: 22, grade: 85, major: "Computer Science" },
+                { name: "Bob", age: 20, grade: 92, major: "Mathematics" },
+                { name: "Charlie", age: 24, grade: 78, major: "Physics" }
+            ];
+        }
+
+        // Validate student data before adding
+        validateStudent(student) {
+            const validations = [
+                { 
+                    check: student.name.trim().length >= 2, 
+                    message: "Name must be at least 2 characters long" 
+                },
+                { 
+                    check: student.age >= 18 && student.age <= 50, 
+                    message: "Age must be between 18 and 50" 
+                },
+                { 
+                    check: student.grade >= 0 && student.grade <= 100, 
+                    message: "Grade must be between 0 and 100" 
+                },
+                { 
+                    check: ["Computer Science", "Mathematics", "Physics", "Engineering"].includes(student.major), 
+                    message: "Invalid major selected" 
+                }
+            ];
+
+            const failedValidation = validations.find(validation => !validation.check);
+            return failedValidation ? failedValidation.message : null;
+        }
+
+        // Add a new student
+        addStudent(student) {
+            const validationError = this.validateStudent(student);
+            if (validationError) {
+                throw new Error(validationError);
+            }
+            this.students.push(student);
+        }
+
+        // Advanced Array Method Demonstrations
+        getAnalytics() {
+            return {
+                // 1. Basic Transformations with map()
+                studentNames: this.students.map(student => student.name),
+                
+                // 2. Filtering with multiple conditions
+                excellentStudents: this.students
+                    .filter(student => student.grade >= 90)
+                    .map(student => `${student.name} (${student.major})`),
+                
+                // 3. Complex reduction with reduce()
+                gradeStatistics: this.students.reduce((stats, student) => ({
+                    total: stats.total + student.grade,
+                    count: stats.count + 1,
+                    average: ((stats.total + student.grade) / (stats.count + 1)).toFixed(2),
+                    min: Math.min(stats.min, student.grade),
+                    max: Math.max(stats.max, student.grade)
+                }), { total: 0, count: 0, average: 0, min: 100, max: 0 }),
+                
+                // 4. Grouping with reduce()
+                studentsByMajor: this.students.reduce((grouped, student) => {
+                    grouped[student.major] = grouped[student.major] || [];
+                    grouped[student.major].push(student.name);
+                    return grouped;
+                }, {})
+            };
+        }
+
+        // Reset students to initial state
+        resetStudents() {
+            this.students = [
+                { name: "Alice", age: 22, grade: 85, major: "Computer Science" },
+                { name: "Bob", age: 20, grade: 92, major: "Mathematics" },
+                { name: "Charlie", age: 24, grade: 78, major: "Physics" }
+            ];
+        }
+    }
+
+    // Initialize StudentDataManager
+    const dataManager = new StudentDataManager();
+
+    // Display Results Function
+    function displayResults() {
+        const outputDiv = document.getElementById('output');
+        const analytics = dataManager.getAnalytics();
+
+        outputDiv.innerHTML = `
+📊 Student Data Analytics 📊
+
+1. Student Names:
+   ${analytics.studentNames.join(', ')}
+
+2. Excellent Students (Grade ≥ 90):
+   ${analytics.excellentStudents.join(', ') || 'No excellent students'}
+
+3. Grade Statistics:
+   Average: ${analytics.gradeStatistics.average}
+   Minimum: ${analytics.gradeStatistics.min}
+   Maximum: ${analytics.gradeStatistics.max}
+
+4. Students by Major:
+   ${Object.entries(analytics.studentsByMajor)
+     .map(([major, names]) => `${major}: ${names.join(', ')}`)
+     .join('\n   ')}
+        `;
+    }
+
+    // Event Listeners
+    document.getElementById('studentForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const errorSpan = document.createElement('span');
+        errorSpan.classList.add('error');
+
+        try {
+            const newStudent = {
+                name: document.getElementById('name').value,
+                age: parseInt(document.getElementById('age').value),
+                grade: parseInt(document.getElementById('grade').value),
+                major: document.getElementById('major').value
+            };
+
+            dataManager.addStudent(newStudent);
+            displayResults();
+
+            // Reset form
+            e.target.reset();
+        } catch (error) {
+            errorSpan.textContent = error.message;
+            e.target.appendChild(errorSpan);
+            setTimeout(() => errorSpan.remove(), 3000);
+        }
+    });
+
+    // Reset Button Listener
+    document.getElementById('resetButton').addEventListener('click', () => {
+        dataManager.resetStudents();
+        displayResults();
+    });
+
+    // Initial display
+    window.onload = displayResults;
+    </script>
+</body>
+</html>
